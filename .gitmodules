@@ -67,7 +67,7 @@
 	url = https://github.com/Mellanox/SAI-Implementation
 [submodule "src/sonic-mgmt-framework"]
 	path = src/sonic-mgmt-framework
-	url = https://github.com/Azure/sonic-mgmt-framework
+	url = https://github.com/pensando/sonic-mgmt-framework
 [submodule "src/sonic-telemetry"]
 	path = src/sonic-telemetry
 	url = https://github.com/Azure/sonic-telemetry
@@ -83,7 +83,7 @@
 	branch = master
 [submodule "src/sonic-mgmt-common"]
 	path = src/sonic-mgmt-common
-	url = https://github.com/Azure/sonic-mgmt-common.git
+	url = https://github.com/pensando/sonic-mgmt-common.git
 [submodule "src/wpasupplicant/sonic-wpa-supplicant"]
 	path = src/wpasupplicant/sonic-wpa-supplicant
 	url = https://github.com/Azure/sonic-wpa-supplicant.git
