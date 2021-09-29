@@ -1,0 +1,11 @@
+[Unit]
+Description=Delays pensando sw container until SONiC has started
+PartOf=pensando-sw.service
+
+[Timer]
+OnUnitActiveSec=0 sec
+OnBootSec=3min 30 sec
+Unit=pensando-sw.service
+
+[Install]
+WantedBy=timers.target sonic.target sonic-delayed.target

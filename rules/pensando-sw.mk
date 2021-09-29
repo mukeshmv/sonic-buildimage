@@ -1,0 +1,15 @@
+# pensando sw package
+
+PENSANDO_SW = pensando-sw_1.0.0-1_$(CONFIGURED_ARCH).deb
+$(PENSANDO_SW)_SRC_PATH = $(SRC_PATH)/pensando
+#$(PENSANDO_SW)_DEPENDS  = 
+#$(PENSANDO_SW)_RDEPENDS = 
+SONIC_MAKE_DEBS += $(PENSANDO_SW)
+
+#PENSANDO_SW_DBG = pensando-sw-dbgsym_1.0.0-1_$(CONFIGURED_ARCH).deb
+#$(PENSANDO_SW_DBG)_DEPENDS += $(PENSANDO_SW)
+#$(PENSANDO_SW_DBG)_RDEPENDS += $(PENSANDO_SW)
+#$(eval $(call add_extra_package,$(PENSANDO_SW),$(PENSANDO_SW_DBG)))
+
+export PENSANDO_SW
+#export PENSANDO_SW_DBG

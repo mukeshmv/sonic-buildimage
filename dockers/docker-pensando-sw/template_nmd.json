@@ -1,0 +1,20 @@
+{
+    "TypeMeta": {
+        "Kind": "DistributedServiceCard"
+    },
+    "ObjectMeta": {
+        "Name": "DistributedServiceCardConfig",
+        "tenant": "default"
+    },
+    "spec": {
+        "primary-mac": "MAC_ADDR",
+        "id": "HOST_NAME",
+        "mode": "NETWORK",
+        "network-mode": "OOB",
+        "dsc-profile": "FEATURE_PROFILE_BASE",
+        "controllers": [
+                "CONTROLLER"
+        ]
+    }
+}
+
