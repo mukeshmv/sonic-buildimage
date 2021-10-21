@@ -1,0 +1,46 @@
+module sonic-psm {
+    namespace "http://github.com/Azure/sonic-psm";
+    prefix psm;
+   
+    import ietf-inet-types {
+	    prefix inet;
+    } 
+
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "SONIC PSM IP details";
+
+    revision 2021-09-01 {
+        description
+            "Initial revision.";
+    }
+
+    container sonic-psm {
+        container PSM {
+            description "IP ADDRESS DETAILS OF THE PSM";            
+	    list PSM_LIST {
+		    key name;
+
+		    leaf name {
+			    type string {
+				    pattern "[a-zA-Z0-9_-]+" {
+					    error-message "Invalid PSM name";
+					    error-app-tag psm-name-invalid;
+				    }
+			    }
+		    }
+
+		    leaf-list ipv4-address {
+			    type inet:ip-address;
+			    description
+				    "List of IPv4/v6 addresses for the PSM";
+		    } 
+	    }
+        } /* end of container PSM*/
+    } /* end of container sonic-psm*/
+}/* end of module sonic-psm*/

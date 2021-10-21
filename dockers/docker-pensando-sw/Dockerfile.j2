@@ -37,6 +37,7 @@ COPY template_fru.json /tmp/
 COPY netagentcfg.sh /usr/bin/
 COPY netagenthal.sh /usr/bin/
 COPY nmd.sh /usr/bin/
+COPY models/ /usr/models/yang/
 
 COPY ["supervisord.conf", "/etc/supervisor/conf.d/"]
 

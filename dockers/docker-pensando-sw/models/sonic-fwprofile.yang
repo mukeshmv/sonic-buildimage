@@ -1,0 +1,168 @@
+module sonic-fwprofile {
+    namespace "http://github.com/Azure/sonic-fwprofile";
+    prefix fwprofile;
+   
+    organization
+        "SONiC";
+
+    contact
+        "SONiC";
+
+    description
+        "SONIC Firewall profile configuration";
+
+    revision 2021-09-02 {
+        description
+            "Initial revision.";
+    }
+
+    grouping fwprofile_spec {
+	leaf TCPDropTimeout {
+		type uint16 {
+		   range "1..300";
+		}
+		units seconds;
+		default 90;
+		description
+			"TCP Drop Timeout is the period in seconds for which a drop entry is installed for a denied TCP flow";
+	}
+
+	leaf UDPDropTimeout {
+
+		type uint32 {
+		   range "1..172800";
+		}
+		units seconds;
+		default 60;
+		description
+			"UDP Drop Timeout is the period in seconds for which a drop entry is installed for a denied UDP flow";
+	}
+	
+	leaf ICMPDropTimeout {
+
+		type uint16 {
+		   range "1..300";
+		}
+		units seconds;
+		default 60;
+		description
+			"ICMP Drop Timeout is the period in seconds for which a drop entry is installed for a denied ICMP flow";
+	}
+
+	leaf DropTimeout {
+
+		type uint16 {
+		   range "1..300";
+		}
+		units seconds;
+		default 60;
+		description
+			"Drop Timeout is the period in seconds for which a drop entry is installed for a denied non tcp/udp/icmp flow";
+	}
+
+	leaf TcpTimeout {
+
+		type uint32 {
+		   range "1..172800";
+		}
+		units seconds;
+		default 3600;
+		description
+			"Tcp Timeout is the period in seconds for which a TCP session is kept alive during inactivity";
+	}
+	
+	leaf UdpTimeout {
+
+		type uint32 {
+		   range "1..172800";
+		}
+		units seconds;
+		default 30;
+		description
+			"Udp Timeout is the period in seconds for which a UDP session is kept alive during inactivity";
+	}
+	
+	leaf IcmpTimeout {
+
+		type uint32 {
+		   range "1..172800";
+		}
+		units seconds;
+		default 6;
+		description
+			"Icmp Timeout is the period in seconds for which a ICMP session is kept alive during inactivity";
+	}
+	
+	leaf TcpHalfOpenSessionLimit {
+
+		type uint16 {
+		   range "0..32768";
+		}
+		default 0;
+		description
+			"Tcp half open session limit config after which new open requests will be dropped";
+	}
+	
+	leaf UdpActiveSessionLimit {
+
+		type uint16 {
+		   range "0..32768";
+		}
+		default 0;
+		description
+			"Udp active session limit config after which new requests will be dropped";
+	}
+	
+	leaf IcmpActiveSessionLimit {
+
+		type uint16 {
+		   range "0..32768";
+		}
+		default 0;
+		description
+			"Icmp active session limit config after which new requests will be dropped";
+	}
+
+	leaf DetectApp {
+		type boolean;
+		default false;
+		description
+			"Set the Application Identification Detection config for DSCs";
+	}
+	
+	leaf ConnectionTracking {
+		type boolean; 
+		description
+			"Enable/disable Connection Tracking";
+	}
+    }
+
+    grouping fwprofile_status {
+	leaf propagationstatus {
+		config false;
+		type string;
+	}
+    }
+
+    container sonic-fwprofile {
+        container FWPROFILE {
+            description "Firewall profile configuration";            
+
+	    list FWPROFILE_LIST {
+		    key name;
+
+		    leaf name {
+			    type string {
+				    pattern "[a-zA-Z0-9_-]+" {
+					    error-message "Invalid FWProfile name";
+					    error-app-tag fwprofile-name-invalid;
+				    }
+			    }
+		    }
+
+		    uses fwprofile_spec;
+		    uses fwprofile_status;
+	    }
+        } /* end of container FWPROFILE*/
+    } /* end of container sonic-fwprofile*/
+}/* end of module sonic-fwprofile*/
