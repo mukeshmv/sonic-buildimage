@@ -35,6 +35,12 @@ module sonic-psm {
 			    }
 		    }
 
+            leaf mgmt-ip {
+                type inet:ip-address;
+                description
+                    "management IP address";
+            }
+
 		    leaf-list ipv4-address {
 			    type inet:ip-address;
 			    description

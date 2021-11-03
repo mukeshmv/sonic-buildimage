@@ -12,7 +12,7 @@
 	sed -i s/SERIAL_NUM/${SERIAL_NUM}/ /tmp/template_fru.json
 	sed -i s/MAC_ADDR/${MAC_ADDR}/ /tmp/template_fru.json
 	mv /tmp/template_fru.json /tmp/fru.json
-	
+    mv /usr/bin/fru.json /tmp/fru.json
 	echo "Starting NMD"
 	NAPLES_PIPELINE=apollo SONIC_MODE=1 /usr/bin/nmd > /tmp/nmd_out.log 2> /tmp/nmd_err.log &
 	sleep 30
