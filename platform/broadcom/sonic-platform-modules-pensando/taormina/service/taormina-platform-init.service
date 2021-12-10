@@ -1,0 +1,13 @@
+[Unit]
+Description=Pensando Taormina platform init service
+Before=pmon.service
+Before=syncd.service
+
+[Service]
+ExecStart=/usr/local/bin/pensando_taormina_util.py
+RemainAfterExit=yes
+StandardOutput=syslog+console
+StandardError=syslog+console
+
+[Install]
+WantedBy=multi-user.target
