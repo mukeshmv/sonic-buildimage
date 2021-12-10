@@ -14,6 +14,12 @@
 
 function create_devices()
 {
+    insmod /home/fpga_func1.ko
+    sleep 1
+    echo 1 > /sys/bus/pci/devices/0000\:12\:00.1/td3_pwr_ctrl
+    sleep 10
+    echo 1 > /sys/bus/pci/rescan
+
     rm -f /dev/linux-knet-cb
     rm -f /dev/linux-bcm-knet
     rm -f /dev/linux-bcm-bde

@@ -46,7 +46,7 @@ static ssize_t store_td3_pwr_ctrl(struct device *dev,
 {
 	struct fpga_f1_data *fdata = dev_get_drvdata(dev);
 	unsigned long val;
-	int ret;
+	int ret, iteration=0, td3_power_stat=0;
 
 	ret = kstrtoul(buf, 0, &val);
 	if (ret < 0)
@@ -55,9 +55,22 @@ static ssize_t store_td3_pwr_ctrl(struct device *dev,
 	if (val == 1) {
 		/* set register to power on */
 		iowrite32(PWR_ON, fdata->membase + TD3_PWR_CTRL_REG);
+		while(iteration < 5){
+			td3_power_stat = ioread32(fdata->membase + TD3_PWR_STAT_REG) & 0x7;
+			printk(KERN_INFO "Shan - 1 td3_power_stat %d", td3_power_stat);
+			if((td3_power_stat != 2) && (td3_power_stat != 3)) {
+				msleep(500);
+				iteration++;
+			} else {
+				printk(KERN_INFO "Shan - 2 td3_power_stat %d", td3_power_stat);
+				break;
+			}
+		}
+		td3_power_stat = ioread32(fdata->membase + TD3_PWR_STAT_REG) & 0x7;
+		printk(KERN_INFO "Shan - 3 td3_power_stat %d", td3_power_stat);
 		udelay(1000);
 		iowrite32(0x1fd, fdata->membase + TD_CTRL_REG);
-		udelay(1000);
+		msleep(500);
 		iowrite32(0x0, fdata->membase + TD_CTRL_REG);
 	} else if (val == 0) {
 		/* set register to power off */
