@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from .log import log_err
+from .log import log_debug, log_err
 
 
 class Directory(object):
@@ -9,6 +9,7 @@ class Directory(object):
     def __init__(self):
         self.data = defaultdict(dict)  # storage. A key is a slot name, a value is a dictionary with data
         self.notify = defaultdict(lambda: defaultdict(list))  # registered callbacks: slot -> path -> handlers[]
+        self.subscription = []
 
     @staticmethod
     def get_slot_name(db, table):
@@ -27,6 +28,7 @@ class Directory(object):
         :param path: storage path as a string where each internal key is separated by '/'
         :return: a pair: True if the path was found, object if it was found
         """
+        log_debug("Directory: Path traverse - data {}".format(self.data))
         if slot not in self.data:
             return False, None
         elif path == '':
@@ -47,6 +49,7 @@ class Directory(object):
         :return: True if the path is available, False otherwise
         """
         slot = self.get_slot_name(db, table)
+        log_debug("Directory: Path exist - db {} table {} slot {} path {}".format(db, table, str(slot), path))
         return self.path_traverse(slot, path)[0]
 
     def get_path(self, db, table, path):
@@ -69,6 +72,7 @@ class Directory(object):
         :param value: value to put
         :return:
         """
+        log_debug("Directory put -> {} {} {} {}".format(db, table, key, str(value)))
         slot = self.get_slot_name(db, table)
         self.data[slot][key] = value
         if slot in self.notify:
@@ -156,4 +160,10 @@ class Directory(object):
         """
         for db, table, path in deps:
             slot = self.get_slot_name(db, table)
+            log_debug("Directory: Subscribe slot {} path {}".format(slot, path))
             self.notify[slot][path].append(handler)
+            self.subscription.append((db, table))
+
+    def get_subscription(self):
+        return self.subscription
+

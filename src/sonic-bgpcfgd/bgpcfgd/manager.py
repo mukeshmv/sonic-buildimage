@@ -30,6 +30,10 @@ class Manager(object):
         """ Return associated table name"""
         return self.table_name
 
+    def get_deps(self):
+        """ Return associated dependencies"""
+        return self.deps
+
     def handler(self, key, op, data):
         """
         This method is executed on each add/remove event on the table.
@@ -53,6 +57,7 @@ class Manager(object):
 
     def on_deps_change(self):
         """ This method is being executed on every dependency change """
+        log_debug(" ---> On deps change {}".format(str(self.deps)))
         if not self.directory.available_deps(self.deps):
             return
         new_queue = []

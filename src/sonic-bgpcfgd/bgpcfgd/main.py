@@ -16,6 +16,8 @@ from .managers_db import BGPDataBaseMgr
 from .managers_intf import InterfaceMgr
 from .managers_setsrc import ZebraSetSrc
 from .managers_static_rt import StaticRouteMgr
+from .managers_appl_bgp import AppBgpGlobal
+from .managers_appl_bgp import AppBgpNeighbor
 from .runner import Runner, signal_handler
 from .template import TemplateFabric
 from .utils import read_constants
@@ -36,8 +38,8 @@ def do_work():
     }
     managers = [
         # Config DB managers
-        BGPDataBaseMgr(common_objs, "CONFIG_DB", swsscommon.CFG_DEVICE_METADATA_TABLE_NAME),
-        BGPDataBaseMgr(common_objs, "CONFIG_DB", swsscommon.CFG_DEVICE_NEIGHBOR_METADATA_TABLE_NAME),
+        #BGPDataBaseMgr(common_objs, "CONFIG_DB", swsscommon.CFG_DEVICE_METADATA_TABLE_NAME),
+        #BGPDataBaseMgr(common_objs, "CONFIG_DB", swsscommon.CFG_DEVICE_NEIGHBOR_METADATA_TABLE_NAME),
         # Interface managers
         InterfaceMgr(common_objs, "CONFIG_DB", swsscommon.CFG_INTF_TABLE_NAME),
         InterfaceMgr(common_objs, "CONFIG_DB", swsscommon.CFG_LOOPBACK_INTERFACE_TABLE_NAME),
@@ -48,19 +50,22 @@ def do_work():
         # State DB managers
         ZebraSetSrc(common_objs, "STATE_DB", swsscommon.STATE_INTERFACE_TABLE_NAME),
         # Peer Managers
-        BGPPeerMgrBase(common_objs, "CONFIG_DB", swsscommon.CFG_BGP_NEIGHBOR_TABLE_NAME, "general", True),
-        BGPPeerMgrBase(common_objs, "CONFIG_DB", swsscommon.CFG_BGP_INTERNAL_NEIGHBOR_TABLE_NAME, "internal", False),
-        BGPPeerMgrBase(common_objs, "CONFIG_DB", "BGP_MONITORS", "monitors", False),
-        BGPPeerMgrBase(common_objs, "CONFIG_DB", "BGP_PEER_RANGE", "dynamic", False),
-        BGPPeerMgrBase(common_objs, "CONFIG_DB", "BGP_VOQ_CHASSIS_NEIGHBOR", "voq_chassis", False),
+        #BGPPeerMgrBase(common_objs, "CONFIG_DB", swsscommon.CFG_BGP_NEIGHBOR_TABLE_NAME, "general", True),
+        #BGPPeerMgrBase(common_objs, "CONFIG_DB", swsscommon.CFG_BGP_INTERNAL_NEIGHBOR_TABLE_NAME, "internal", False),
+        #BGPPeerMgrBase(common_objs, "CONFIG_DB", "BGP_MONITORS", "monitors", False),
+        #BGPPeerMgrBase(common_objs, "CONFIG_DB", "BGP_PEER_RANGE", "dynamic", False),
+        #BGPPeerMgrBase(common_objs, "CONFIG_DB", "BGP_VOQ_CHASSIS_NEIGHBOR", "voq_chassis", False),
         # AllowList Managers
-        BGPAllowListMgr(common_objs, "CONFIG_DB", "BGP_ALLOWED_PREFIXES"),
+        #BGPAllowListMgr(common_objs, "CONFIG_DB", "BGP_ALLOWED_PREFIXES"),
         # BBR Manager
-        BBRMgr(common_objs, "CONFIG_DB", "BGP_BBR"),
+        #BBRMgr(common_objs, "CONFIG_DB", "BGP_BBR"),
         # Static Route Managers
-        StaticRouteMgr(common_objs, "CONFIG_DB", "STATIC_ROUTE"),
+        #StaticRouteMgr(common_objs, "CONFIG_DB", "STATIC_ROUTE"),
+        # Appl_DB BGP Mgr
+        AppBgpGlobal(common_objs, "APPL_DB", "BGP_GLOBAL"),
+        AppBgpNeighbor(common_objs, "APPL_DB", "BGP_NEIGHBOR"),
     ]
-    runner = Runner(common_objs['cfg_mgr'])
+    runner = Runner(common_objs['cfg_mgr'], common_objs['directory'])
     for mgr in managers:
         runner.add_manager(mgr)
     runner.run()

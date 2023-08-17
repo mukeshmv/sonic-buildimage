@@ -20,13 +20,31 @@ class Runner(object):
     """
     SELECT_TIMEOUT = 1000
 
-    def __init__(self, cfg_manager):
+    def __init__(self, cfg_manager, directory):
         """ Constructor """
         self.cfg_manager = cfg_manager
+        self.directory = directory
         self.db_connectors = {}
         self.selector = swsscommon.Select()
         self.callbacks = defaultdict(lambda: defaultdict(list))  # db -> table -> handlers[]
         self.subscribers = set()
+        for db_name, table_name in self.directory.get_subscription():
+            log_debug("Directory subscription -> {} {}".format(db_name, table_name))
+            db_id = swsscommon.SonicDBConfig.getDbId(db_name)
+            if db_id not in self.db_connectors:
+                self.db_connectors[db_id] = swsscommon.DBConnector(db_name, 0)
+            if table_name not in self.callbacks[db_id]:
+                conn = self.db_connectors[db_id]
+                subscriber = swsscommon.SubscriberStateTable(conn, table_name)
+                self.subscribers.add(subscriber)
+                self.selector.addSelectable(subscriber)
+                log_debug("Add subscriber for table {} in DB {}".format(table_name, db_name))
+            self.callbacks[db_id][table_name].append(
+                    lambda key, op, data:
+                     directory.put(db_name, table_name, key, data)
+                     if op == swsscommon.SET_COMMAND
+                    else directory.remove(db_name, table_name, key))
+            log_debug("Add callback for table {} in DB {}".format(table_name, db_name))
 
     def add_manager(self, manager):
         """
@@ -46,7 +64,9 @@ class Runner(object):
             subscriber = swsscommon.SubscriberStateTable(conn, table_name)
             self.subscribers.add(subscriber)
             self.selector.addSelectable(subscriber)
+            log_debug("Add subscriber for table {} in DB {}".format(table_name, db_name))
         self.callbacks[db][table_name].append(manager.handler)
+        log_debug("Add callback for table {} in DB {}".format(table_name, db_name))
 
     def run(self):
         """ Main loop """
