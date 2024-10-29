@@ -60,7 +60,7 @@ REBOOT_CAUSE_MAP = {
     1 : "Kernel Panic",
     15 : "Hardware watchdog reset",
 }
-
+REBOOT_CAUSE_NON_HARDWARE_LIST = [16, 20, 0, 1, 8, 2, 24, 25, 12]
 
 class Chassis(ChassisBase):
     """Platform-specific Chassis class"""
@@ -77,9 +77,6 @@ class Chassis(ChassisBase):
 
         if not self._api_helper.is_host():
             self._api_helper.setup_cpldapp()
-
-        self.interrupt_handler = None
-        self.event_handler = None
 
         log_info("System chassis is ready")
 
@@ -201,7 +198,7 @@ class Chassis(ChassisBase):
         global NUM_THERMAL
         board_id = self._api_helper.get_board_id()
         if board_id == 130:
-            NUM_THERMAL = 3
+            NUM_THERMAL = 5
         if Thermal._thermals_available():
             for index in range(0, NUM_THERMAL):
                 thermal = Thermal(index)
@@ -438,15 +435,15 @@ class Chassis(ChassisBase):
             reset_cause = int(self._api_helper.readline_txt_file(RESET_CAUSE_PATH),16)
             for bit in bits:
                 if((reset_cause >> bit) & 1):
-                    if bit <= 15:
-                        return (REBOOT_CAUSE_SOFTWARE, REBOOT_CAUSE_MAP[bit])
+                    if bit in REBOOT_CAUSE_NON_HARDWARE_LIST:
+                        return (self.REBOOT_CAUSE_NON_HARDWARE, REBOOT_CAUSE_MAP[bit])
                     else:
-                        return (REBOOT_CAUSE_EXTERNAL, REBOOT_CAUSE_MAP[bit])
+                        return (self.REBOOT_CAUSE_HARDWARE_OTHER, REBOOT_CAUSE_MAP[bit])
 
             reboot_cause_path = (HOST_REBOOT_CAUSE_PATH + REBOOT_CAUSE_FILE)
             sw_reboot_cause = self._api_helper.readline_txt_file(reboot_cause_path) or "Unknown"
             if "Unknown" in sw_reboot_cause:
-                return (self.REBOOT_CAUSE_HARDWARE_OTHER, "NPU side powercycle")
+                return (self.REBOOT_CAUSE_NON_HARDWARE, "Unknown")
             return (self.REBOOT_CAUSE_NON_HARDWARE, sw_reboot_cause)
         except:
             return (self.REBOOT_CAUSE_NON_HARDWARE, "Unknown")
@@ -468,12 +465,3 @@ class Chassis(ChassisBase):
         """
         return False
 
-    def get_interrupt_handler(self):
-        from sonic_platform.interrupt import InterruptHandler
-        self.interrupt_handler = InterruptHandler()
-        return self.interrupt_handler
-
-    def get_event_handler(self):
-        from sonic_platform.interrupt import EventHandler
-        self.event_handler = EventHandler()
-        return self.event_handler

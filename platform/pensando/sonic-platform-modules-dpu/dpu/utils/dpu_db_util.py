@@ -17,7 +17,9 @@ import syslog
 from sonic_py_common import daemon_base, logger, syslogger
 from swsscommon.swsscommon import SonicV2Connector
 from sonic_py_common.task_base import ProcessTaskBase
+import multiprocessing
 import grpc
+from concurrent import futures
 from google.protobuf.empty_pb2 import Empty
 
 SYSLOG_IDENTIFIER = 'dpu-db-utild'
@@ -39,7 +41,7 @@ try:
     grpc_files_path = (str(Path(sonic_platform.__file__).parent.absolute()))
     if grpc_files_path not in sys.path:
         sys.path.append(grpc_files_path)
-    from sonic_platform import oper_pb2, oper_pb2_grpc, system_pb2, system_pb2_grpc
+    from sonic_platform import oper_pb2, oper_pb2_grpc, system_pb2, system_pb2_grpc, dpu_util_pb2, dpu_util_pb2_grpc
 except Exception as e:
     log_err(f'failed to load modules due to {e}')
 
@@ -54,6 +56,8 @@ EVENT_PORT = 11360
 PDS_PORT = 11357
 NOT_AVAILABLE = 'N/A'
 ERR_UNKNOWN = 1
+IP = "0.0.0.0"
+PORT = 12000
 SIGNALS_TO_NAMES_DICT = dict((getattr(signal, n), n) for n in dir(signal) if n.startswith('SIG') and '_' not in n)
 
 # operd event functions
@@ -405,6 +409,55 @@ class RebootCauseUpdater():
         except Exception as e:
             log_err('Failed to update system health values for {} - {}'.format(name, repr(e)))
 
+class DpuUtilSvcServicer(dpu_util_pb2_grpc.DpuUtilSvcServicer):
+
+    def GetRebootCause(self, request, context):
+        try:
+            slot_id = get_slot_id(None)
+            file_name = "/host/reboot-cause/previous-reboot-cause.json"
+            file = open(file_name, "r")
+            data = file.read()
+            if data != '':
+                json_data = json.loads(data)
+                name = json_data['gen_time']
+                cause = json_data['cause']
+                time = json_data['time']
+                user = json_data['user']
+                comment = json_data['comment']
+                reboot_cause = dpu_util_pb2.RebootCause(
+                    name=name, cause=cause, time=time, user=user, comment=comment
+                    )
+                return dpu_util_pb2.RebootCauseResponse(slot_id=slot_id, reboot_cause=reboot_cause, success=True)
+            else:
+                log_err("Reboot-cause history is not available in reboot-causes")
+                return dpu_util_pb2.RebootCauseResponse(slot_id=slot_id, reboot_cause=Empty, success=False)
+        except Exception as e:
+            log_err(f"Failed to sent reboot cause response due to {e}")
+            return dpu_util_pb2.RebootCauseResponse(slot_id=slot_id, reboot_cause=Empty, success=False)
+
+class RebootCauseGRPCUpdater():
+
+    def __init__(self):
+        self.process = multiprocessing.Process(target=self.serve)
+
+    def serve(self):
+        channel_addr = "{}:{}".format(IP, str(PORT))
+        server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+        dpu_util_pb2_grpc.add_DpuUtilSvcServicer_to_server(DpuUtilSvcServicer(), server)
+        server.add_insecure_port(channel_addr)
+        server.start()
+        log_info(f"Server started. Listening on port {PORT}")
+        server.wait_for_termination()
+
+    def start(self):
+        self.process.start()
+
+    def stop(self):
+        if self.process.is_alive():
+            self.process.terminate()
+            self.process.join()
+            log_info("gRPC server process terminated.")
+
 class VersionUpdater():
     def __init__(self, chassis, db):
         self.db = db
@@ -528,8 +581,10 @@ class DpuDBUtilDaemon(daemon_base.DaemonBase):
             pass
         if self.db == None:
             return
-        self.reboot_cause_updater = RebootCauseUpdater(self.chassis, self.db)
-        self.reboot_cause_updater.update()
+        # self.reboot_cause_updater = RebootCauseUpdater(self.chassis, self.db)
+        # self.reboot_cause_updater.update()
+        self.reboot_cause_updater = RebootCauseGRPCUpdater()
+        self.reboot_cause_updater.start()
         self.version_updater = VersionUpdater(self.chassis, self.db)
         self.version_updater.update()
         self.event_handler = EventHandler(self.chassis, self.db)
@@ -542,6 +597,7 @@ class DpuDBUtilDaemon(daemon_base.DaemonBase):
         if self.db == None:
             return
         self.event_handler.stop()
+        self.reboot_cause_updater.stop()
 
     # Override signal handler from DaemonBase
     def signal_handler(self, sig, frame):
@@ -561,6 +617,7 @@ class DpuDBUtilDaemon(daemon_base.DaemonBase):
             exit_code = 128 + sig  # Make sure we exit with a non-zero code so that supervisor will try to restart us
             if self.db != None:
                 self.event_handler.stop()
+                self.reboot_cause_updater.stop()
             self.stop_event.set()
         elif sig in NONFATAL_SIGNALS:
             log_info("Caught signal '{}' - ignoring...".format(SIGNALS_TO_NAMES_DICT[sig]))

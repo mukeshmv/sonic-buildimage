@@ -282,8 +282,9 @@ OVERLAY_MODULE_CHECK := \
 BUILD_TIMESTAMP := $(shell date +%Y%m%d\.%H%M%S)
 
 # Create separate Docker lockfiles for saving vs. loading an image.
+DOCKER_LOCKDIR=/home/sonic/sonic-mtfuji-release-only/sonic-buildimage
 ifeq ($(DOCKER_LOCKDIR),)
-override DOCKER_LOCKDIR := /tmp/docklock
+override DOCKER_LOCKDIR := /home/sonic/sonic-mtfuji-release-only/sonic-buildimage 
 endif
 DOCKER_LOCKFILE_SAVE := $(DOCKER_LOCKDIR)/docker_save.lock
 $(shell mkdir -m 0777 -p $(DOCKER_LOCKDIR))

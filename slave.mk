@@ -555,7 +555,6 @@ endef
 
 define docker-image-save
     @echo "Attempting docker image lock for $(1) save" $(LOG)
-    $(call MOD_LOCK,$(1),$(DOCKER_LOCKDIR),$(DOCKER_LOCKFILE_SUFFIX),$(DOCKER_LOCKFILE_TIMEOUT))
     @echo "Obtained docker image lock for $(1) save" $(LOG)
     @echo "Tagging docker image $(1)-$(DOCKER_USERNAME):$(DOCKER_USERTAG) as $(1):$(call docker-get-tag,$(1))" $(LOG)
     docker tag $(1)-$(DOCKER_USERNAME):$(DOCKER_USERTAG) $(1):$(call docker-get-tag,$(1)) $(LOG)
@@ -565,7 +564,6 @@ define docker-image-save
         @echo "Removing docker image $(1):$(call docker-get-tag,$(1))" $(LOG)
         docker rmi -f $(1):$(call docker-get-tag,$(1)) $(LOG)
     fi
-    $(call MOD_UNLOCK,$(1))
     @echo "Released docker image lock for $(1) save" $(LOG)
     @echo "Removing docker image $(1)-$(DOCKER_USERNAME):$(DOCKER_USERTAG)" $(LOG)
     docker rmi -f $(1)-$(DOCKER_USERNAME):$(DOCKER_USERTAG) $(LOG)
@@ -580,7 +578,6 @@ endef
 # $(2) => Docker target name
 define docker-image-load
     @echo "Attempting docker image lock for $(1) load" $(LOG)
-    $(call MOD_LOCK,$(1),$(DOCKER_LOCKDIR),$(DOCKER_LOCKFILE_SUFFIX),$(DOCKER_LOCKFILE_TIMEOUT))
     @echo "Obtained docker image lock for $(1) load" $(LOG)
     @echo "Loading docker image $(TARGET_PATH)/$(1).gz" $(LOG)
     docker load -i $(TARGET_PATH)/$(1).gz $(LOG)
@@ -590,7 +587,6 @@ define docker-image-load
         @echo "Removing docker image $(1):latest" $(LOG)
         docker rmi -f $(1):$(call docker-get-tag,$(1)) $(LOG)
     fi
-    $(call MOD_UNLOCK,$(1))
     @echo "Released docker image lock for $(1) load" $(LOG)
 endef
 
@@ -1111,7 +1107,8 @@ $(addprefix $(TARGET_PATH)/,$(DOWNLOADED_DOCKER_IMAGES)) : $(TARGET_PATH)/%.gz :
 	$(HEADER)
 
 	rm -rf $@ $@.log
-	wget "$($*.gz_URL)" -O target/$(DOWNLOADED_DOCKER_IMAGES) $(LOG)
+	#wget "$($*.gz_URL)" -O target/$(DOWNLOADED_DOCKER_IMAGES) $(LOG)
+	cp files/dsc/docker-dpu-base.gz target/docker-dpu-base.gz
 
 	$(FOOTER)
 
