@@ -113,16 +113,16 @@ FRR_USER_GID = 300
 #	cache   :  Same as rwcache
 # SONIC_DPKG_CACHE_SOURCE - Stores the cache location details
 SONIC_DPKG_CACHE_METHOD ?= none
-SONIC_DPKG_CACHE_SOURCE ?= /var/cache/sonic/artifacts
+SONIC_DPKG_CACHE_SOURCE ?= /home/sonic/sonic-mtfuji-release-only/sonic-buildimage/artifacts 
 
 # Default VS build memory preparation
 DEFAULT_VS_PREPARE_MEM = yes
 
 # INCLUDE_SYSTEM_GNMI - build docker-sonic-gnmi for system gnmi support
-INCLUDE_SYSTEM_GNMI = y
+INCLUDE_SYSTEM_GNMI = n
 
 # INCLUDE_SYSTEM_EVENTD - build docker-eventd for system eventd support
-INCLUDE_SYSTEM_EVENTD = y
+INCLUDE_SYSTEM_EVENTD = n
 
 # INCLUDE_SYSTEM_TELEMETRY - build docker-sonic-telemetry for system telemetry support
 INCLUDE_SYSTEM_TELEMETRY = n
@@ -131,10 +131,10 @@ INCLUDE_SYSTEM_TELEMETRY = n
 INCLUDE_ICCPD = n
 
 # INCLUDE_SFLOW - build docker-sflow for sFlow support
-INCLUDE_SFLOW = y
+INCLUDE_SFLOW = n
 
 # INCLUDE_MGMT_FRAMEWORK - build docker-sonic-mgmt-framework for CLI and REST server support
-INCLUDE_MGMT_FRAMEWORK = y
+INCLUDE_MGMT_FRAMEWORK = n
 
 # ENABLE_HOST_SERVICE_ON_START - enable sonic-host-server for mgmt-framework and/or
 # gnmi containers to access host functionality by default
@@ -144,7 +144,7 @@ ENABLE_HOST_SERVICE_ON_START = y
 INCLUDE_RESTAPI ?= n
 
 # INCLUDE_NAT - build docker-nat for nat support
-INCLUDE_NAT = y
+INCLUDE_NAT = n
 
 # INCLUDE_DHCP_RELAY - build and install dhcp-relay package
 INCLUDE_DHCP_RELAY = y
@@ -172,10 +172,10 @@ INCLUDE_MACSEC = y
 INCLUDE_GBSYNCD ?= y
 
 # INCLUDE_TEAMD - build docker-teamd for LAG protocol support
-INCLUDE_TEAMD ?= y
+INCLUDE_TEAMD = n
 
 # INCLUDE_ROUTER_ADVERTISER - build docker-router-advertiser for router advertisements support
-INCLUDE_ROUTER_ADVERTISER ?= y
+INCLUDE_ROUTER_ADVERTISER = n
 
 # INCLUDE_KUBERNETES - if set to y kubernetes packages are installed to be able to
 # run as worker node in kubernetes cluster.
@@ -286,7 +286,7 @@ REGISTRY_SERVER_PATH ?=
 BUILD_MULTIASIC_KVM = n
 
 # INCLUDE_MUX - build docker-mux for dual ToR (Gemini)
-INCLUDE_MUX = y
+INCLUDE_MUX = n
 
 # ENABLE_ASAN - enable address sanitizer
 ENABLE_ASAN ?= n

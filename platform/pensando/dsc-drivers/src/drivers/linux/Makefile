@@ -1,6 +1,7 @@
 ifneq ($(KERNELRELEASE),)
 obj-$(CONFIG_IONIC) += eth/ionic/
 obj-$(CONFIG_IONIC_MNIC) += eth/ionic/
+obj-$(CONFIG_L2_DISABLE) += l2_disable/
 obj-$(CONFIG_MDEV) += mdev/
 obj-$(CONFIG_MNET_UIO_PDRV_GENIRQ) += mnet_uio_pdrv_genirq/
 else
@@ -30,14 +31,17 @@ KSRC ?= ${NICDIR}/buildroot/output/${ASIC}/linux-headers
 KMOD_OUT_DIR ?= ${BLD_OUT_DIR}/drivers_submake
 KMOD_SRC_DIR ?= ${TOPDIR}/platform/drivers/linux-ionic
 ETH_KOPT += CONFIG_IONIC_MNIC=m
+ETH_KOPT += CONFIG_L2_DISABLE=m
 ETH_KOPT += CONFIG_MDEV=m
 ETH_KOPT += CONFIG_MNET_UIO_PDRV_GENIRQ=m
 KOPT += CROSS_COMPILE=aarch64-linux-gnu-
 KOPT += ARCH=arm64
 KCFLAGS += -DCONFIG_IONIC_MNIC
+KCFLAGS += -DCONFIG_L2_DISABLE
 KCFLAGS += -DCONFIG_MDEV
 KCFLAGS += -DCONFIG_MNET_UIO_PDRV_GENIRQ
 ALL = mnic
+ALL += l2_disable 
 ALL += mnet_uio_pdrv_genirq
 ALL += mdev
 export PATH := $(PATH):$(TOOLCHAIN_DIR)/bin
@@ -57,6 +61,7 @@ include linux_ver.mk
 KSRC ?= /lib/modules/$(shell uname -r)/build
 ETH_KOPT += CONFIG_IONIC=m
 ETH_KOPT += CONFIG_IONIC_MNIC=_
+ETH_KOPT += CONFIG_L2_DISABLE=_
 ETH_KOPT += CONFIG_MDEV=_
 ETH_KOPT += CONFIG_MNET_UIO_PDRV_GENIRQ=_
 KCFLAGS += -DCONFIG_IONIC
@@ -86,6 +91,12 @@ mnic:
 	touch $(KMOD_OUT_DIR)/Makefile
 	$(MAKE) -C $(KSRC) V=1 M=$(KMOD_OUT_DIR) src=$(KMOD_SRC_DIR)/eth/ionic $(KOPT)
 	mv ${KMOD_OUT_DIR}/Module.symvers ${KMOD_OUT_DIR}/Module.symvers.mnic
+
+l2_disable: KOPT+=$(ETH_KOPT)
+l2_disable:
+	@echo "===> Building l2 disable driver "
+	$(MAKE) -C $(KSRC) V=1 M=$(KMOD_OUT_DIR) src=$(KMOD_SRC_DIR)/l2_disable $(KOPT)
+	mv ${KMOD_OUT_DIR}/Module.symvers ${KMOD_OUT_DIR}/Module.symvers.l2disable
 
 mnet_uio_pdrv_genirq: KOPT+=$(ETH_KOPT)
 mnet_uio_pdrv_genirq:
@@ -128,6 +139,6 @@ cscope:
 	find $(IONIC_ETH_SRC) -name '*.[ch]' > cscope.files
 	cscope -bkq
 
-.PHONY: default all mnic mdev mnet_uio_pdrv_genirq eth clean install modules_install cscope
+.PHONY: default all l2_disable mnic mdev mnet_uio_pdrv_genirq eth clean install modules_install cscope
 
 endif
