@@ -82,7 +82,7 @@ LOCALHOST_SUBTYPE=`sonic-db-cli CONFIG_DB hget "DEVICE_METADATA|localhost" "subt
 if [[ x"${LOCALHOST_SUBTYPE}" == x"SmartSwitch" ]]; then
     midplane_mgmt_ip=$( ip -json -4 addr show eth0-midplane | jq -r ".[0].addr_info[0].local" )
     mgmt_ip=$( ip -json -4 addr show eth0 | jq -r ".[0].addr_info[0].local" )
-    if [[ $midplane_ip != "" ]]; then
+    if [[ $midplane_ip != "" ]] && [[ $midplane_ip != "null" ]]; then
         # Enable ZMQ with eth0-midplane address
         ORCHAGENT_ARGS+=" -q tcp://${midplane_mgmt_ip}:8100"
     elif [[ $mgmt_ip != "" ]] && [[ $mgmt_ip != "null" ]]; then
